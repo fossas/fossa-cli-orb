@@ -3,15 +3,14 @@
 version: 2.1
 
 description: |
-  This orb easily integrates FOSSA (https://fossa.com/) into your projects to automate open source compliance.
+  This orb integrates open source licensing compliance and vulnerability checks into your CI/CD workflow.
   Source: https://github.com/fossas/fossa-cli-orb
 
 examples:
   standard_fossa_usage:
     description: |
       If you have a standard CircleCI configuration file, you can simply add this
-      orb and then run fossa-cli/import, fossa-cli/init, and fossa-cli/analyze
-      to automate open source compliance.
+      orb and then run fossa-cli/setup to streamline open source compliance.
     usage:
       version: 2.1
 
@@ -40,74 +39,88 @@ examples:
   #               command: --debug
 
 commands:
-  import:
+  setup:
     description: |
-      Imports the fossa-cli to your environment.
-    parameters:
-      FOSSA_API_KEY:
-        description: |
-          Required parameter - Sets the FOSSA_API_KEY environment variable, which is associated with a user on https://app.fossa.com.
-        type: string
+      Executes all the commands necessary to integrate fossa-cli into your CI/CD workflow.
     steps:
       - run:
           name: Imports fossa-cli
           command: |
             curl https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
-      - when:
-          condition: << parameters.FOSSA_API_KEY >>
-          steps:
-            run:
-              name: Sets the FOSSA_API_KEY environment variable.
-              command: export FOSSA_API_KEY=<< parameters.FOSSA_API_KEY >>
-  init:
-    description: |
-      Initializes a .fossa.yml file for the fossa-cli to reference in identifying open source dependencies.
-    parameters:
-      debug:
-        description: |
-          Enables the fossa-cli debug mode.
-        type: boolean
-        default: false
-    steps:
-      - when:
-          condition: << parameters.debug >>
-          steps:
-            run:
-              name: Runs fossa init with debug mode enabled.
-              command: fossa init --debug
-      - unless:
-          condition: << parameters.debug >>
-          steps:
-            run:
-              name: Runs fossa init without debug mode enabled.
-              command: fossa init
-  analyze:
-    description: |
-      Analyzes the project with the fossa-cli and generates a dependency graph.
-    parameters:
-      debug:
-        description: |
-          Enables the fossa-cli debug mode.
-        type: boolean
-        default: false
-      endpoint:
-        description: |
-          Sets the endpoint to which the fossa-cli sends the dependency graph.
-        type: string
-        default: https://app.fossa.com
-    steps:
-      - when:
-          condition: << parameters.debug >>
-          steps:
-            run:
-              name: Runs fossa analyze with debug mode enabled.
-              command: fossa analyze --debug -e << parameters.endpoint >>
-      - unless:
-          condition: << parameters.debug >>
-          steps:
-            run:
-              name: Runs fossa analyze without debug mode enabled.
-              command: fossa analyze -e << parameters.endpoint >>
+      - run:
+          name: Initializes fossa-cli by generating a .fossa.yml configuration file
+          command: fossa init
+      - run:
+          name: Analyzes the project with fossa-cli and generates a dependency graph
+          command: fossa analyze
+  # import:
+  #   description: |
+  #     Imports the fossa-cli to your environment.
+  #   parameters:
+  #     FOSSA_API_KEY:
+  #       description: |
+  #         Required parameter - Sets the FOSSA_API_KEY environment variable, which is associated with a user on https://app.fossa.com.
+  #       type: string
+  #   steps:
+  #     - run:
+  #         name: Imports fossa-cli
+  #         command: |
+  #           curl https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | bash
+  #     - when:
+  #         condition: << parameters.FOSSA_API_KEY >>
+  #         steps:
+  #           run:
+  #             name: Sets the FOSSA_API_KEY environment variable.
+  #             command: export FOSSA_API_KEY=<< parameters.FOSSA_API_KEY >>
+  # init:
+  #   description: |
+  #     Initializes a .fossa.yml file for the fossa-cli to reference in identifying open source dependencies.
+  #   parameters:
+  #     debug:
+  #       description: |
+  #         Enables the fossa-cli debug mode.
+  #       type: boolean
+  #       default: false
+  #   steps:
+  #     - when:
+  #         condition: << parameters.debug >>
+  #         steps:
+  #           run:
+  #             name: Runs fossa init with debug mode enabled.
+  #             command: fossa init --debug
+  #     - unless:
+  #         condition: << parameters.debug >>
+  #         steps:
+  #           run:
+  #             name: Runs fossa init without debug mode enabled.
+  #             command: fossa init
+  # analyze:
+  #   description: |
+  #     Analyzes the project with the fossa-cli and generates a dependency graph.
+  #   parameters:
+  #     debug:
+  #       description: |
+  #         Enables the fossa-cli debug mode.
+  #       type: boolean
+  #       default: false
+  #     endpoint:
+  #       description: |
+  #         Sets the endpoint to which the fossa-cli sends the dependency graph.
+  #       type: string
+  #       default: https://app.fossa.com
+  #   steps:
+  #     - when:
+  #         condition: << parameters.debug >>
+  #         steps:
+  #           run:
+  #             name: Runs fossa analyze with debug mode enabled.
+  #             command: fossa analyze --debug -e << parameters.endpoint >>
+  #     - unless:
+  #         condition: << parameters.debug >>
+  #         steps:
+  #           run:
+  #             name: Runs fossa analyze without debug mode enabled.
+  #             command: fossa analyze -e << parameters.endpoint >>
   custom:
     description: |
       Run any custom fossa-cli command (more instructions here: https://github.com/fossas/fossa-cli/blob/master/docs/user-guide.md/#cli-reference)
@@ -121,12 +134,12 @@ commands:
           name: Run any custom fossa=cli command.
           command: << parameters.command >>
 
-jobs:
-  setup:
-    description: |
-      Imports the fossa-cli to your environment and run a standard `fossa init` and `fossa analyze`.
-      This is the recommended job to use if you're using the FOSSA SaaS offering (https://app.fossa.com).
-    steps:
-      - import
-      - init
-      - analyze
+# jobs:
+#   setup:
+#     description: |
+#       Imports the fossa-cli to your environment and run a standard `fossa init` and `fossa analyze`.
+#       This is the recommended job to use if you're using the FOSSA SaaS offering (https://app.fossa.com).
+#     steps:
+#       - import
+#       - init
+#       - analyze
