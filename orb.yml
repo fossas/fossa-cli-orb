@@ -4,40 +4,78 @@ version: 2.1
 
 description: |
   This orb integrates open source licensing compliance and vulnerability checks into your CI/CD workflow.
-  Source: https://github.com/fossas/fossa-cli-orb
+  Source - https://github.com/fossas/fossa-cli-orb
+  Docs - https://github.com/fossas/fossa-cli/blob/master/docs/user-guide.md/#cli-reference
 
 examples:
-  standard_fossa_usage:
+  analyze_job:
     description: |
-      If you have a standard CircleCI configuration file, you can simply add this
-      orb and then run fossa-cli/setup to streamline open source compliance.
+      Analyze a project from within your workflow automatically.
     usage:
       version: 2.1
-
       orbs:
-        fossa-cli: fossa/cli@dev:alpha
-
+        fossa-cli: fossa/cli@x.y.z
       workflows:
         fossa-integration:
           jobs:
+            - fossa-cli/analyze:
+                post-steps:
+                  - run: # run more commands if desired
+
+  custom_commands:
+    description: Install and configure the Fossa CLI in your custom jobs.
+    usage:
+      version: 2.1
+      orbs:
+        fossa-cli: fossa/cli@x.y.z
+      jobs:
+        my-job:
+          executor: fossa-cli/default # or your own custom executor
+          steps:
+            - checkout
             - fossa-cli/setup
+            - run: echo "Run more commands here"
 
-  custom_fossa_usage:
+executors:
+  default:
     description: |
-      You can run any custom fossa-cli command that you wish. In the example
-      below we are running `fossa analyze` with the debug flag enabled.
-    usage:
-      version: 2.1
+      A basic linux environment. Override with your own Docker image if needed.
+    docker:
+    - image: <<parameters.image>>
+    parameters:
+      image:
+        default: cimg/base@2019.08-node
+        description: |
+          Select a custom Docker image. https://hub.docker.com/r/circleci/
+        type: string
 
-      orbs:
-        fossa-cli: fossa/cli@dev:alpha
-
-      workflows:
-        fossa-integration:
-          jobs:
-            - fossa-cli/custom:
-                custom-command:
-                  - fossa analyze --debug
+jobs:
+  analyze:
+    description: |
+      Analyze a project
+    executor: default
+    parameters:
+      save_artifact:
+        type: boolean
+        default: true
+        description: Saves an artifact with the results of the analysis.
+      debug:
+        type: boolean
+        default: false
+        description: Include the boolean flag.
+    steps:
+      - checkout
+      - setup
+      - run:
+          name: Fossa Analyze
+          command: |
+            mkdir -p /tmp/fossa/analyze
+            fossa analyze <<# parameters.debug >>--debug <</ parameters.debug >><<# parameters.save_artifact >>-o /tmp/fossa/analyze/fossa_results.txt<</ parameters.save_artifact >>
+      - when:
+          condition: << parameters.save_artifact >>
+          steps:
+            - store_artifacts:
+                path: /tmp/fossa/analyze
 
 commands:
   setup:
@@ -54,18 +92,3 @@ commands:
       - run:
           name: Analyze the project with fossa-cli and generate a dependency graph
           command: fossa analyze
-  custom:
-    description: |
-      Run any custom fossa-cli command (more instructions here: https://github.com/fossas/fossa-cli/blob/master/docs/user-guide.md/#cli-reference)
-    parameters:
-      custom-command:
-        description: |
-          Define any custom fossa-cli command.
-        type: string
-    steps:
-      - when:
-          condition: << parameters.custom-command >>
-          steps:
-            - run:
-                name: Run any custom fossa-cli command.
-                command: << parameters.custom-command >>
