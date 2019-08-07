@@ -14,7 +14,7 @@ examples:
     usage:
       version: 2.1
       orbs:
-        fossa-cli: fossa/cli@x.y.z
+        fossa-cli: fossa/cli@0.0.2
       workflows:
         fossa-integration:
           jobs:
@@ -27,7 +27,7 @@ examples:
     usage:
       version: 2.1
       orbs:
-        fossa-cli: fossa/cli@x.y.z
+        fossa-cli: fossa/cli@0.0.2
       jobs:
         my-job:
           executor: fossa-cli/default # or your own custom executor
@@ -81,6 +81,9 @@ commands:
   setup:
     description: |
       Executes all the commands necessary to integrate fossa-cli into your CI/CD workflow.
+      Note that the fossa-cli will check for the existence of a FOSSA_API_KEY environment variable.
+      Please refer to https://docs.fossa.com/docs/api-reference for more details regarding the
+      FOSSA_API_KEY.
     steps:
       - run:
           name: Imports fossa-cli
