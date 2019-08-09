@@ -14,7 +14,7 @@ examples:
     usage:
       version: 2.1
       orbs:
-        fossa-cli: fossa/cli@0.0.2
+        fossa-cli: fossa/cli@0.0.3
       workflows:
         fossa-integration:
           jobs:
@@ -27,7 +27,7 @@ examples:
     usage:
       version: 2.1
       orbs:
-        fossa-cli: fossa/cli@0.0.2
+        fossa-cli: fossa/cli@0.0.3
       jobs:
         my-job:
           executor: fossa-cli/default # or your own custom executor
