@@ -55,6 +55,13 @@ jobs:
       Analyze a project
     executor: default
     parameters:
+      fossa-api-key:
+        type: env_var_name
+        default: FOSSA_API_KEY
+        description: |
+          The fossa-cli will check for the existence of a FOSSA_API_KEY environment variable.
+          Users will need to obtain a FOSSA_API_KEY prior to running a FOSSA analysis.
+          Please refer to https://docs.fossa.com/docs/api-reference for more details.
       save_artifact:
         type: boolean
         default: true
@@ -70,7 +77,7 @@ jobs:
           name: Fossa Analyze
           command: |
             mkdir -p /tmp/fossa/analyze
-            fossa analyze <<# parameters.debug >>--debug <</ parameters.debug >><<# parameters.save_artifact >>-o /tmp/fossa/analyze/fossa_results.txt<</ parameters.save_artifact >>
+            FOSSA_API_KEY=<<parameters.fossa-api-key>> fossa analyze <<# parameters.debug >>--debug <</ parameters.debug >><<# parameters.save_artifact >>-o /tmp/fossa/analyze/fossa_results.txt<</ parameters.save_artifact >>
       - when:
           condition: << parameters.save_artifact >>
           steps:
