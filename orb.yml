@@ -4,8 +4,10 @@ version: 2.1
 
 description: |
   This orb integrates open source licensing compliance and vulnerability checks into your CI/CD workflow.
-  Source - https://github.com/fossas/fossa-cli-orb
   Docs - https://github.com/fossas/fossa-cli/blob/master/docs/user-guide.md/#cli-reference
+display:
+  home_url: https://fossa.com/
+  source_url: https://github.com/fossas/fossa-cli-orb
 
 examples:
   analyze_job:
